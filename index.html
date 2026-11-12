@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Grooves</title>
+  <meta name="theme-color" content="#111111">
+  <!-- iPhone: spuštění z plochy bez lišty Safari, název a ikona -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Grooves">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Grooves</h1>
+    <p class="mut">Test mikrofonu</p>
+
+    <ul class="info">
+      <li>Spuštěno: <b id="rezim">…</b></li>
+      <li>Zabezpečené spojení: <b id="https">…</b></li>
+      <li>Mikrofon: <b id="stav">vypnutý</b></li>
+    </ul>
+
+    <button id="tlacitko">Zapnout mikrofon</button>
+
+    <div class="meter" aria-label="Hlasitost">
+      <div id="uroven"></div>
+    </div>
+    <div id="uder" class="uder" aria-hidden="true"></div>
+
+    <p id="chyba" class="chyba"></p>
+    <p class="mut">Pusť hudbu z reproduktoru. Ukazatel má kmitat a kolečko blikat do rytmu.</p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

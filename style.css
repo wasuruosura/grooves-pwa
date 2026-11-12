@@ -1,0 +1,58 @@
+:root {
+  --bg: #111111;
+  --text: #f2f2f2;
+  --mut: #9a9a9a;
+  --accent: #e8a33d;
+  --chyba: #ff6b6b;
+  --line: #2a2a2a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.5 -apple-system, system-ui, sans-serif;
+  /* výřez a domovská lišta iPhonu */
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+}
+
+main { max-width: 480px; margin: 0 auto; padding-top: 24px; }
+h1 { margin: 0; font-size: 28px; font-weight: 600; }
+.mut { color: var(--mut); }
+
+.info { list-style: none; padding: 0; margin: 24px 0; }
+.info li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+
+button {
+  width: 100%;
+  padding: 16px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--accent);
+  border: 0;
+  border-radius: 12px;
+}
+
+.meter {
+  height: 24px;
+  margin: 24px 0 16px;
+  background: var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+#uroven { height: 100%; width: 0; background: var(--accent); }
+
+.uder {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 0.12s;
+}
+.uder.zap { background: var(--accent); transition: none; }
+
+.chyba { color: var(--chyba); min-height: 1.5em; }
