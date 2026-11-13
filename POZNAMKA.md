@@ -32,7 +32,7 @@
 - 2026-11-13: přidáno tlačítko **Vypnout mikrofon** (jedno tlačítko přepíná Zapnout/Vypnout, při vypnutí `track.stop()` a `ctx.close()`, na iPhonu má zmizet indikátor mikrofonu). `VERZE` → `grooves-v3`. Ověřeno ve vestavěném prohlížeči s podstrčeným tónem místo mikrofonu (skutečný mikrofon tam blokovaný): přepínání tam a zpět, stopa `ended`. Na iPhonu neověřeno. **Commit `b243fac`, pushnutý 2026-11-13** (uživatel předtím viděl na telefonu starou verzi, protože změna nebyla na Pages).
 - 2026-11-13: Grooves (PC) má hotový export sbírky a import měření, commit `874b084` ve `vinyl-hledac`. Formát a postup: `..\vinyl-hledac\POZNAMKA.md` (sekce BPM, „Strana Grooves hotová“). Přenos souborů přes Signal, Poznámka pro sebe.
 
-- **2026-11-13: výměna dat s Grooves (strana telefonu), kód hotový, necommitnutý.** Zadání odsouhlasené uživatelem („Ano, začni“). `VERZE` → `grooves-v4`.
+- **2026-11-13: výměna dat s Grooves (strana telefonu), kód hotový, commit `5182f7b` (2026-11-13). Push zatím neprošel: PC nepřeložil github.com (DNS), ani v terminálu uživatele.** Zadání odsouhlasené uživatelem („Ano, začni“). `VERZE` → `grooves-v4`.
   - Záložky Sbírka / Měření / Mikrofon (`index.html`). Nové soubory `db.js` (IndexedDB `grooves`: šuplík `kv` s exportem pod klíčem `sbirka`, šuplík `mereni` s klíčem `release_id|pozice`) a `sbirka.js` (Sbírka, Měření, export). Oba v `SOUBORY` v `sw.js`.
   - Sbírka: výběr souboru `grooves-sbirka` v1, kontrola formátu, hledání bez diakritiky (interpret, název, katalogové číslo, label, tracky), max 40 desek v seznamu, přepínač „Jen desky s tracky bez BPM“. Deska se rozbalí na tracky, BPM z měření v telefonu přebíjí BPM z exportu.
   - Proměřit desku: fronta tracků bez BPM, po Uložit další, tlačítko Přeskočit, upozornění „Otoč desku: strana B“ při změně písmene strany.
@@ -42,7 +42,7 @@
   - **Neověřeno:** Sdílet do Signalu na iPhonu (z plochy), výběr souboru ze Souborů/Signalu na iPhonu, data v IndexedDB po zavření appky na iPhonu, skutečný import v Grooves přes UI.
   - Testovací kopie exportu byla v `test-data/` (v `.gitignore`, smazaná). Ve vestavěném prohlížeči appky zůstala testovací sbírka a 1 měření v IndexedDB pro `localhost:8780`.
 
-Další krok: uživatel rozhodne o commitu a pushi, pak test na iPhonu: Export do mobilu v Grooves → Signal → Soubory → Načíst sbírku, změřit pár tracků, Poslat do Grooves → Signal → Import z mobilu v Grooves. Pak krok (5) detekce BPM z mikrofonu (zdroj `detect`). Mobilní Trénink (kalkulačka pitche) zatím není. Lokálně SW na tomto PC nejspíš nepůjde (podezření na Avast), offline ověřovat na Pages a iPhonu.
+Další krok: zopakovat `git push` (až půjde síť na github.com), pak test na iPhonu: Export do mobilu v Grooves → Signal → Soubory → Načíst sbírku, změřit pár tracků, Poslat do Grooves → Signal → Import z mobilu v Grooves. Pak krok (5) detekce BPM z mikrofonu (zdroj `detect`). Mobilní Trénink (kalkulačka pitche) zatím není. Lokálně SW na tomto PC nejspíš nepůjde (podezření na Avast), offline ověřovat na Pages a iPhonu.
 
 Historie kroku 1:
 1. Uživatel vyzkouší lokálně v Chromu.
