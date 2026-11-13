@@ -1,4 +1,4 @@
-// Sbírka z Grooves, výběr tracku, měření BPM (ručně nebo tapem) a export měření do Grooves.
+// Sbírka z Grooves, výběr tracku, měření BPM (mikrofonem, tapem nebo ručně) a export měření do Grooves.
 // Formáty souborů jsou dané stranou Grooves (vinyl-hledac, mobile.py):
 //   dovnitř: {"format":"grooves-sbirka","version":1,"exported":…,"releases":[…]}
 //   ven:     {"format":"grooves-mereni","version":1,"measurements":[…]}
@@ -11,7 +11,10 @@ const otevrene = new Set(); // id rozbalených desek v seznamu
 let vybrany = null;         // {deska, track} právě měřený track
 let fronta = null;          // režim Proměřit desku: {deska, tracky, i}
 let tapy = [];              // časy ťuků v ms
-let bpmZTapu = false;       // BPM v poli vzniklo tapem (ne ručně)
+let zdrojBpm = "manual";    // odkud je BPM v poli: manual / tap / detect
+let detekce = null;         // běžící měření z mikrofonu: {detektor, uzel, odhady, dalsi}
+let nasobek = 1;            // oprava ×2 / ÷2 pro vybraný track
+let detekcePise = true;     // false, jakmile uživatel BPM sám ťukne nebo napíše
 
 const MAX_DESEK = 40; // víc desek v seznamu najednou nekreslit, ať je hledání svižné
 
@@ -22,6 +25,7 @@ function prepniZalozku(jmeno) {
     b.classList.toggle("vybrana", b.dataset.zalozka === jmeno);
   }
   for (const s of ["sbirka", "mereni", "mikrofon"]) el("z-" + s).hidden = s !== jmeno;
+  if (jmeno !== "mereni" && detekce) vypniMikrofon(); // měření z mikrofonu jen na záložce Měření
   window.scrollTo(0, 0);
 }
 for (const b of document.querySelectorAll(".zalozky button")) {
@@ -193,7 +197,11 @@ function vyberTrack(deska, track) {
   // Pitch zůstává z minula: při proměřování desky se fader obvykle nemění.
   el("me-bpm").value = "";
   tapy = [];
-  bpmZTapu = false;
+  zdrojBpm = "manual";
+  if (detekce) vypniMikrofon();
+  nasobek = 1;
+  detekcePise = true;
+  el("me-det").hidden = true;
   el("me-tap-info").textContent = "Ťukej do rytmu. Víc ťuků = přesnější. Pauza 2 s začne znovu.";
   el("me-chyba").textContent = "";
 
@@ -243,7 +251,7 @@ function prepocitej() {
   el("me-nula").textContent = n == null ? "—" : n.toFixed(2);
 }
 
-el("me-bpm").addEventListener("input", () => { bpmZTapu = false; prepocitej(); });
+el("me-bpm").addEventListener("input", () => { zdrojBpm = "manual"; detekcePise = false; prepocitej(); });
 el("me-pitch").addEventListener("input", prepocitej);
 
 // pointerdown místo click: reaguje hned při dotyku, ne až po zvednutí prstu.
@@ -267,7 +275,8 @@ el("me-tap").addEventListener("pointerdown", (ev) => {
   tapy.forEach((y, x) => { cit += (x - mx) * (y - my); jm += (x - mx) ** 2; });
   const bpm = 60000 / (cit / jm);
   el("me-bpm").value = bpm.toFixed(2);
-  bpmZTapu = true;
+  zdrojBpm = "tap";
+  detekcePise = false; // ťuknuté BPM detekce nepřepíše
   el("me-tap-info").textContent = `${n} ťuků${n < 8 ? ", ťukej dál" : ""}`;
   prepocitej();
 });
@@ -278,6 +287,7 @@ el("me-ulozit").addEventListener("click", async () => {
   const n = bpmNaNule();
   if (n == null) { el("me-chyba").textContent = "Vyplň BPM a pitch (číslo)."; return; }
   if (!(n > 20 && n < 400)) { el("me-chyba").textContent = "BPM musí být mezi 20 a 400."; return; }
+  if (detekce) vypniMikrofon();
   const { deska, track } = vybrany;
   const zaznam = {
     release_id: deska.id,
@@ -285,7 +295,7 @@ el("me-ulozit").addEventListener("click", async () => {
     bpm: Math.round(n * 100) / 100,
     rpm: el("me-rpm").value,
     pitch: cislo(el("me-pitch").value),
-    source: bpmZTapu ? "tap" : "manual",
+    source: zdrojBpm,
     ts: Date.now() / 1000,
     odeslano: false,
   };
@@ -301,6 +311,107 @@ el("me-ulozit").addEventListener("click", async () => {
   if (fronta) dalsiVeFronte();
   else el("me-ted").textContent = `Uloženo: ${zaznam.bpm.toFixed(2)} BPM (neodesláno)`;
 });
+
+// ---------- Měření z mikrofonu (výpočet v bpm.js, mikrofon v mikrofon.js) ----------
+
+let zapinaniDetekce = false; // brání dvojímu ťuknutí během čekání na povolení
+
+el("me-mic").addEventListener("click", () => (detekce ? vypniMikrofon() : zapniDetekci()));
+
+async function zapniDetekci() {
+  if (zapinaniDetekce) return;
+  zapinaniDetekce = true;
+  el("me-chyba").textContent = "";
+  try {
+    const { ctx, zdroj } = await zapniMikrofon(konecDetekce);
+    // ScriptProcessor: zastaralý, ale na iPhonu spolehlivý. Dává zvuk po 4096 vzorcích (~85 ms).
+    const uzel = ctx.createScriptProcessor(4096, 1, 1);
+    detekce = { detektor: new DetektorBPM(ctx.sampleRate), uzel, odhady: [], dalsi: ctx.sampleRate };
+    uzel.onaudioprocess = (ev) => {
+      ev.outputBuffer.getChannelData(0).fill(0); // do reproduktoru ticho
+      zpracuj(ev.inputBuffer.getChannelData(0));
+    };
+    zdroj.connect(uzel);
+    uzel.connect(ctx.destination); // bez připojení na výstup prohlížeč uzel nespouští
+    detekcePise = true;
+    el("me-mic").textContent = "Zastavit měření";
+    el("me-mic").classList.add("bezi");
+    el("me-det").hidden = false;
+    el("me-det-info").textContent = "Poslouchám…";
+  } catch (e) {
+    konecDetekce();
+    el("me-chyba").textContent = popisChybyMikrofonu(e);
+  } finally {
+    zapinaniDetekce = false;
+  }
+}
+
+// Zavolá mikrofon.js při vypnutí (tlačítkem, Uložit, jiný track, jiná záložka, test mikrofonu).
+// Poslední odhad a ×2 / ÷2 zůstanou vidět.
+function konecDetekce() {
+  if (detekce) {
+    detekce.uzel.onaudioprocess = null;
+    detekce.uzel.disconnect();
+  }
+  detekce = null;
+  el("me-mic").textContent = "Měřit z mikrofonu";
+  el("me-mic").classList.remove("bezi");
+  el("me-uroven").style.width = "0%";
+}
+
+function zpracuj(data) {
+  const d = detekce;
+  if (!d) return;
+  d.detektor.pridej(data);
+  let soucet = 0;
+  for (const x of data) soucet += x * x;
+  el("me-uroven").style.width = Math.min(100, Math.sqrt(soucet / data.length) * 400) + "%";
+  d.dalsi -= data.length;
+  if (d.dalsi > 0) return;
+  d.dalsi += d.detektor.sr; // odhad jednou za sekundu zvuku
+  ukazOdhad(d);
+}
+
+function ukazOdhad(d) {
+  const info = el("me-det-info");
+  const sek = Math.round(d.detektor.sekund());
+  const o = d.detektor.odhad();
+  if (!o) { info.textContent = `Poslouchám ${sek} s…`; return; }
+  if (o.jistota < MIN_JISTOTA) {
+    info.textContent = `Poslouchám ${sek} s · rytmus nejasný, dej telefon blíž k reproduktoru`;
+    return;
+  }
+  d.odhady.push(o.bpm);
+  const u = ustaleni(d.odhady);
+  const bpm = (u.bpm ?? o.bpm) * nasobek;
+  const stav = u.rozptyl == null ? "ustaluje se…"
+    : `kolísá ±${((u.rozptyl * nasobek) / 2).toFixed(2)}${u.ustaleno ? " · ustáleno" : ""}`;
+  info.replaceChildren(`${sek} s · `, novyPrvek("b", null, bpm.toFixed(2)), ` BPM · ${stav}`);
+  if (u.ustaleno && detekcePise) {
+    el("me-bpm").value = bpm.toFixed(2);
+    zdrojBpm = "detect";
+    prepocitej();
+  }
+}
+
+// Detekce se může splést o polovinu/dvojnásobek (typicky 87 ↔ 174). Oprava platí pro pole
+// i pro další odhady u tohoto tracku.
+function opravNasobek(k) {
+  nasobek *= k;
+  let odhad = null; // nezaokrouhlený poslední odhad detekce, ať ÷2 a ×2 nesčítají zaokrouhlení
+  if (detekce && detekce.odhady.length) {
+    odhad = (ustaleni(detekce.odhady).bpm ?? detekce.odhady[detekce.odhady.length - 1]) * nasobek;
+    const b = el("me-det-info").querySelector("b");
+    if (b) b.textContent = odhad.toFixed(2);
+  }
+  const bpm = cislo(el("me-bpm").value);
+  if (bpm != null) {
+    el("me-bpm").value = (zdrojBpm === "detect" && odhad != null ? odhad : bpm * k).toFixed(2);
+    prepocitej();
+  }
+}
+el("me-dvakrat").addEventListener("click", () => opravNasobek(2));
+el("me-pul").addEventListener("click", () => opravNasobek(0.5));
 
 // ---------- Export do Grooves ----------
 

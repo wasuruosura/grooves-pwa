@@ -1,12 +1,14 @@
 // Service worker: uloží soubory appky, aby šla spustit i bez sítě.
 // Při každé změně souborů appky zvýšit VERZE, jinak telefon novou verzi nestáhne.
 
-const VERZE = "grooves-v4";
+const VERZE = "grooves-v5";
 const SOUBORY = [
   "./",
   "index.html",
   "style.css",
   "db.js",
+  "mikrofon.js",
+  "bpm.js",
   "sbirka.js",
   "app.js",
   "manifest.webmanifest",

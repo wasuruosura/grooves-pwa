@@ -23,47 +23,39 @@ if ("serviceWorker" in navigator) {
   $("offline").textContent = "nepřipraveno (prohlížeč neumí)";
 }
 
-let ctx = null;
-let stream = null;
+// Test mikrofonu: ukazatel hlasitosti a hrubé blikání do rytmu. Mikrofon sám je v mikrofon.js.
+let zapnuto = false;
 let snimek = 0; // id requestAnimationFrame, aby šlo měření zastavit
 let zapinani = false; // brání dvojímu ťuknutí během čekání na povolení
 
-$("tlacitko").addEventListener("click", () => (ctx ? vypni() : zapni()));
+$("tlacitko").addEventListener("click", () => (zapnuto ? vypniMikrofon() : zapni()));
 
 async function zapni() {
   if (zapinani) return;
   zapinani = true;
   $("chyba").textContent = "";
   try {
-    // Bez úprav zvuku: potlačení šumu a automatická hlasitost by hudbu zkreslily.
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-    });
-    // iOS pustí zvuk jen po ťuknutí, proto AudioContext vzniká až tady.
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    await ctx.resume();
+    const { ctx, zdroj } = await zapniMikrofon(poVypnuti);
+    zapnuto = true;
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 1024;
-    ctx.createMediaStreamSource(stream).connect(analyser);
+    zdroj.connect(analyser);
     $("stav").textContent = `zapnutý (${ctx.sampleRate} Hz)`;
     $("tlacitko").textContent = "Vypnout mikrofon";
     sleduj(analyser);
   } catch (e) {
-    vypni();
+    poVypnuti();
     $("stav").textContent = "nefunguje";
-    $("chyba").textContent = popisChyby(e);
+    $("chyba").textContent = popisChybyMikrofonu(e);
   } finally {
     zapinani = false;
   }
 }
 
-function vypni() {
+// Zavolá mikrofon.js při vypnutí (tlačítkem tady, nebo když mikrofon převezme měření BPM).
+function poVypnuti() {
+  zapnuto = false;
   cancelAnimationFrame(snimek);
-  // Zastavit stopy mikrofonu: teprve pak telefon mikrofon opravdu pustí (zmizí indikátor).
-  if (stream) stream.getTracks().forEach((t) => t.stop());
-  if (ctx) ctx.close();
-  stream = null;
-  ctx = null;
   $("stav").textContent = "vypnutý";
   $("tlacitko").textContent = "Zapnout mikrofon";
   $("uroven").style.width = "0%";
@@ -95,12 +87,4 @@ function sleduj(analyser) {
     snimek = requestAnimationFrame(krok);
   };
   snimek = requestAnimationFrame(krok);
-}
-
-function popisChyby(e) {
-  if (!window.isSecureContext) return "Stránka neběží přes HTTPS, mikrofon je zakázaný.";
-  if (!navigator.mediaDevices) return "Prohlížeč mikrofon nepodporuje.";
-  if (e.name === "NotAllowedError") return "Mikrofon není povolený. Povol ho v Nastavení → Safari → Mikrofon a zkus znovu.";
-  if (e.name === "NotFoundError") return "Nenašel jsem žádný mikrofon.";
-  return `Chyba: ${e.name} ${e.message}`;
 }

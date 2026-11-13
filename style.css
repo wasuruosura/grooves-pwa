@@ -109,5 +109,11 @@ input[type=search], input[type=text], select {
 button.tap { margin: 16px 0 4px; padding: 40px 16px; font-size: 24px; user-select: none; -webkit-user-select: none; }
 button.tap.zap { background: var(--text); }
 #me-ulozit { margin-bottom: 8px; }
+button.mic { margin: 16px 0 4px; }
+button.mic.bezi { background: var(--text); }
+.meter.mala { height: 10px; margin: 12px 0 8px; }
+#me-uroven { height: 100%; width: 0; background: var(--accent); }
+#me-det-info { font-variant-numeric: tabular-nums; }
+#me-det-info b { color: var(--text); font-size: 20px; }
 #me-nula { font-size: 22px; }
 .export { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); }

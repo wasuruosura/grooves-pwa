@@ -68,6 +68,17 @@
         </div>
         <p class="mut mensi">Pitch a BPM jak jsou nastavené a slyšet na gramofonu. Uloží se BPM přepočtené na 0 %.</p>
 
+        <button id="me-mic" class="mic">Měřit z mikrofonu</button>
+        <div id="me-det" hidden>
+          <div class="meter mala" aria-label="Hlasitost"><div id="me-uroven"></div></div>
+          <p id="me-det-info" class="mut mensi"></p>
+          <div class="radek">
+            <button id="me-pul" class="druhe">÷2</button>
+            <button id="me-dvakrat" class="druhe">×2</button>
+          </div>
+        </div>
+        <p id="me-mic-tip" class="mut mensi">Pusť desku, telefon polož k reproduktoru. Po ustálení se BPM samo vyplní.</p>
+
         <button id="me-tap" class="tap">Tap</button>
         <p id="me-tap-info" class="mut mensi">Ťukej do rytmu. Víc ťuků = přesnější. Pauza 2 s začne znovu.</p>
 
@@ -85,7 +96,7 @@
       </div>
     </section>
 
-    <!-- Mikrofon: test, že zvuk teče (detekce BPM přijde později) -->
+    <!-- Mikrofon: test, že zvuk teče (měření BPM je v záložce Měření) -->
     <section id="z-mikrofon" hidden>
       <ul class="info">
         <li>Spuštěno: <b id="rezim">…</b></li>
@@ -106,6 +117,8 @@
     </section>
   </main>
   <script src="db.js"></script>
+  <script src="mikrofon.js"></script>
+  <script src="bpm.js"></script>
   <script src="sbirka.js"></script>
   <script src="app.js"></script>
 </body>
