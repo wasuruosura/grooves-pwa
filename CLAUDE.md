@@ -6,12 +6,14 @@ Aktuální stav, rozhodnutí a další krok: `POZNAMKA.md`. Přečíst na začá
 
 ## Spuštění
 
-- Lokálně: `uv run --no-project python -m http.server 8780` v kořeni projektu, pak http://localhost:8780 v Chromu. Na `localhost` mikrofon funguje i bez HTTPS.
+- Lokálně: `uv run --no-project python server.py` v kořeni projektu (http.server, jen `.js` posílá jako JavaScript, jinak Chrome odmítne service worker), pak http://localhost:8780 v Chromu. Na `localhost` mikrofon funguje i bez HTTPS.
 - Na iPhonu: přes GitHub Pages (HTTPS), pak Safari → Sdílet → Přidat na plochu.
 
 ## Struktura
 
 - `index.html`, `style.css`, `app.js`: statická stránka, vanilla JS bez frameworku a bez build kroku.
+- `sw.js`: service worker, offline cache. **Při každé změně souborů appky zvýšit `VERZE`**, jinak telefon dál ukazuje starou verzi. Nový soubor appky přidat i do `SOUBORY`.
+- `server.py`: lokální vývojový server na `127.0.0.1:8780`.
 - `manifest.webmanifest`, `icons/`: instalace na plochu. iPhone bere ikonu z `apple-touch-icon` (PNG 180×180), SVG neumí.
 
 ## Konvence a pravidla

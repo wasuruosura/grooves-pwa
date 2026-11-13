@@ -7,6 +7,22 @@ const zPlochy = navigator.standalone === true || matchMedia("(display-mode: stan
 $("rezim").textContent = zPlochy ? "z plochy" : "v prohlížeči";
 $("https").textContent = window.isSecureContext ? "ano" : "ne (mikrofon nepůjde)";
 
+// Offline: service worker uloží soubory appky. "připraveno" až když je aktivní,
+// tedy soubory jsou opravdu v cache.
+if ("serviceWorker" in navigator) {
+  const sw = navigator.serviceWorker;
+  // updateViaCache: "none" = sw.js vždy ze sítě, ne z HTTP cache (GitHub Pages ji drží ~10 min).
+  sw.register("sw.js", { updateViaCache: "none" }).catch(async (e) => {
+    // Bez sítě registrace selže (nejde stáhnout sw.js), ale uložená verze dál funguje.
+    // "nepřipraveno" jen když opravdu žádný aktivní service worker není.
+    const reg = await sw.getRegistration();
+    if (!reg || !reg.active) $("offline").textContent = `nepřipraveno (${e.message})`;
+  });
+  sw.ready.then(() => { $("offline").textContent = "připraveno"; });
+} else {
+  $("offline").textContent = "nepřipraveno (prohlížeč neumí)";
+}
+
 let ctx = null;
 
 $("tlacitko").addEventListener("click", async () => {
