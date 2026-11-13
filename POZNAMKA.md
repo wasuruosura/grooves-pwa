@@ -17,7 +17,7 @@
 
 ## Další krok
 
-**Krok (2) offline, 2026-11-13: kód napsaný, necommitnutý (větev `prvni-verze`).**
+**Krok (2) offline, 2026-11-13: commit `6ea6f7d` ve větvi `prvni-verze`, pushnutý na GitHub. Uživatel 2026-11-13 hlásí „Funguje“: na iPhonu přes Pages podle postupu (z plochy se sítí, pak režim Letadlo). Krok 2 hotový.** **Řádek „Spuštěno: z plochy“ uživatel neověřil**, ověřit při dalším testu na iPhonu.
 - `sw.js`: cache `grooves-v1`, při instalaci uloží soubory appky, cache-first, v `activate` maže staré verze. **Při změně appky zvýšit `VERZE`.**
 - `app.js`: registrace s `updateViaCache: "none"`, řádek „Offline: připraveno / nepřipraveno“ v `index.html`.
 - `server.py`: lokální server místo `python -m http.server`, protože ten na Windows posílá `.js` jako `text/plain` a Chrome by SW odmítl (ověřeno přes curl; zapsáno v `postupy/prohlizec.md`).
@@ -29,7 +29,9 @@
 - **Neověřeno:** iPhone offline (režim Letadlo).
 - Zadání odsouhlasené uživatelem. Artifact na claude.ai místo PWA: probráno, zůstáváme u PWA (nejde offline ani na plochu, data by nebyla jen v telefonu).
 
-Další: commit (s ním i starší záznam o testu mikrofonu) → push na pokyn → test na iPhonu z plochy v režimu Letadlo (a při tom ověřit řádek „Spuštěno: z plochy“). Pak krok (3) mobilní Sbírka a Trénink.
+- 2026-11-13: přidáno tlačítko **Vypnout mikrofon** (jedno tlačítko přepíná Zapnout/Vypnout, při vypnutí `track.stop()` a `ctx.close()`, na iPhonu má zmizet indikátor mikrofonu). `VERZE` → `grooves-v3`. Ověřeno ve vestavěném prohlížeči s podstrčeným tónem místo mikrofonu (skutečný mikrofon tam blokovaný): přepínání tam a zpět, stopa `ended`. Na iPhonu neověřeno, necommitnuté.
+
+Další: krok (3) mobilní Sbírka a Trénink, v nové session („grooves-pwa: krok 3, přečti POZNAMKA.md“). Začít krátkým zadáním k odsouhlasení. Při každé změně souborů appky zvýšit `VERZE` v `sw.js`. Lokálně SW na tomto PC nejspíš nepůjde (podezření na Avast), offline ověřovat na Pages a iPhonu.
 
 Historie kroku 1:
 1. Uživatel vyzkouší lokálně v Chromu.

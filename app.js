@@ -24,13 +24,19 @@ if ("serviceWorker" in navigator) {
 }
 
 let ctx = null;
+let stream = null;
+let snimek = 0; // id requestAnimationFrame, aby šlo měření zastavit
+let zapinani = false; // brání dvojímu ťuknutí během čekání na povolení
 
-$("tlacitko").addEventListener("click", async () => {
-  if (ctx) return;
+$("tlacitko").addEventListener("click", () => (ctx ? vypni() : zapni()));
+
+async function zapni() {
+  if (zapinani) return;
+  zapinani = true;
   $("chyba").textContent = "";
   try {
     // Bez úprav zvuku: potlačení šumu a automatická hlasitost by hudbu zkreslily.
-    const stream = await navigator.mediaDevices.getUserMedia({
+    stream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
     });
     // iOS pustí zvuk jen po ťuknutí, proto AudioContext vzniká až tady.
@@ -40,14 +46,29 @@ $("tlacitko").addEventListener("click", async () => {
     analyser.fftSize = 1024;
     ctx.createMediaStreamSource(stream).connect(analyser);
     $("stav").textContent = `zapnutý (${ctx.sampleRate} Hz)`;
-    $("tlacitko").textContent = "Mikrofon běží";
+    $("tlacitko").textContent = "Vypnout mikrofon";
     sleduj(analyser);
   } catch (e) {
-    ctx = null;
+    vypni();
     $("stav").textContent = "nefunguje";
     $("chyba").textContent = popisChyby(e);
+  } finally {
+    zapinani = false;
   }
-});
+}
+
+function vypni() {
+  cancelAnimationFrame(snimek);
+  // Zastavit stopy mikrofonu: teprve pak telefon mikrofon opravdu pustí (zmizí indikátor).
+  if (stream) stream.getTracks().forEach((t) => t.stop());
+  if (ctx) ctx.close();
+  stream = null;
+  ctx = null;
+  $("stav").textContent = "vypnutý";
+  $("tlacitko").textContent = "Zapnout mikrofon";
+  $("uroven").style.width = "0%";
+  $("uder").classList.remove("zap");
+}
 
 function sleduj(analyser) {
   const data = new Float32Array(analyser.fftSize);
@@ -71,9 +92,9 @@ function sleduj(analyser) {
       $("uder").classList.add("zap");
       setTimeout(() => $("uder").classList.remove("zap"), 80);
     }
-    requestAnimationFrame(krok);
+    snimek = requestAnimationFrame(krok);
   };
-  requestAnimationFrame(krok);
+  snimek = requestAnimationFrame(krok);
 }
 
 function popisChyby(e) {
