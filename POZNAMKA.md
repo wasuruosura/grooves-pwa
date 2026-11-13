@@ -29,9 +29,20 @@
 - **Neověřeno:** iPhone offline (režim Letadlo).
 - Zadání odsouhlasené uživatelem. Artifact na claude.ai místo PWA: probráno, zůstáváme u PWA (nejde offline ani na plochu, data by nebyla jen v telefonu).
 
-- 2026-11-13: přidáno tlačítko **Vypnout mikrofon** (jedno tlačítko přepíná Zapnout/Vypnout, při vypnutí `track.stop()` a `ctx.close()`, na iPhonu má zmizet indikátor mikrofonu). `VERZE` → `grooves-v3`. Ověřeno ve vestavěném prohlížeči s podstrčeným tónem místo mikrofonu (skutečný mikrofon tam blokovaný): přepínání tam a zpět, stopa `ended`. Na iPhonu neověřeno, necommitnuté.
+- 2026-11-13: přidáno tlačítko **Vypnout mikrofon** (jedno tlačítko přepíná Zapnout/Vypnout, při vypnutí `track.stop()` a `ctx.close()`, na iPhonu má zmizet indikátor mikrofonu). `VERZE` → `grooves-v3`. Ověřeno ve vestavěném prohlížeči s podstrčeným tónem místo mikrofonu (skutečný mikrofon tam blokovaný): přepínání tam a zpět, stopa `ended`. Na iPhonu neověřeno. **Commit `b243fac`, pushnutý 2026-11-13** (uživatel předtím viděl na telefonu starou verzi, protože změna nebyla na Pages).
+- 2026-11-13: Grooves (PC) má hotový export sbírky a import měření, commit `874b084` ve `vinyl-hledac`. Formát a postup: `..\vinyl-hledac\POZNAMKA.md` (sekce BPM, „Strana Grooves hotová“). Přenos souborů přes Signal, Poznámka pro sebe.
 
-Další: krok (3) mobilní Sbírka a Trénink, v nové session („grooves-pwa: krok 3, přečti POZNAMKA.md“). Začít krátkým zadáním k odsouhlasení. Při každé změně souborů appky zvýšit `VERZE` v `sw.js`. Lokálně SW na tomto PC nejspíš nepůjde (podezření na Avast), offline ověřovat na Pages a iPhonu.
+- **2026-11-13: výměna dat s Grooves (strana telefonu), kód hotový, necommitnutý.** Zadání odsouhlasené uživatelem („Ano, začni“). `VERZE` → `grooves-v4`.
+  - Záložky Sbírka / Měření / Mikrofon (`index.html`). Nové soubory `db.js` (IndexedDB `grooves`: šuplík `kv` s exportem pod klíčem `sbirka`, šuplík `mereni` s klíčem `release_id|pozice`) a `sbirka.js` (Sbírka, Měření, export). Oba v `SOUBORY` v `sw.js`.
+  - Sbírka: výběr souboru `grooves-sbirka` v1, kontrola formátu, hledání bez diakritiky (interpret, název, katalogové číslo, label, tracky), max 40 desek v seznamu, přepínač „Jen desky s tracky bez BPM“. Deska se rozbalí na tracky, BPM z měření v telefonu přebíjí BPM z exportu.
+  - Proměřit desku: fronta tracků bez BPM, po Uložit další, tlačítko Přeskočit, upozornění „Otoč desku: strana B“ při změně písmene strany.
+  - Měření: otáčky (z exportu), pitch % (zůstává mezi tracky), BPM ručně nebo Tap (regrese časů ťuků, pauza 2 s = nová série). Ukládá `bpm` při 0 % = BPM / (1 + pitch/100), `rpm`, `pitch` **v procentech** (rozhodnuto výchozím způsobem), `source` manual/tap, `ts` v sekundách, `odeslano`.
+  - Export: jen neodeslaná (nebo zaškrtnout „Poslat všechna znovu“), `navigator.share` se souborem (`application/json`, jinak `text/plain`), jinak stažení. Po sdílení/stažení označí jako odeslané, při zrušení sdílení ne.
+  - **Ověřeno 2026-11-13 ve vestavěném prohlížeči** na skutečném exportu z běžícího Grooves (116 desek, 557 tracků, 166 s BPM): načtení, hledání, fronta 9 tracků dvojalba s upozorněním B/C/D, tap (9 ťuků), ruční zadání s čárkou a záporným pitchem (127,5 při −1,5 % → 129,44), data po reloadu zůstanou, mobilní šířka 375 px vypadá v pořádku. Export (cesta se stažením) má správný formát a **Grooves `/api/mobile/preview` ho přijal** (stavy new / unknown, nic se neuložilo).
+  - **Neověřeno:** Sdílet do Signalu na iPhonu (z plochy), výběr souboru ze Souborů/Signalu na iPhonu, data v IndexedDB po zavření appky na iPhonu, skutečný import v Grooves přes UI.
+  - Testovací kopie exportu byla v `test-data/` (v `.gitignore`, smazaná). Ve vestavěném prohlížeči appky zůstala testovací sbírka a 1 měření v IndexedDB pro `localhost:8780`.
+
+Další krok: uživatel rozhodne o commitu a pushi, pak test na iPhonu: Export do mobilu v Grooves → Signal → Soubory → Načíst sbírku, změřit pár tracků, Poslat do Grooves → Signal → Import z mobilu v Grooves. Pak krok (5) detekce BPM z mikrofonu (zdroj `detect`). Mobilní Trénink (kalkulačka pitche) zatím není. Lokálně SW na tomto PC nejspíš nepůjde (podezření na Avast), offline ověřovat na Pages a iPhonu.
 
 Historie kroku 1:
 1. Uživatel vyzkouší lokálně v Chromu.

@@ -1,4 +1,4 @@
-// Grooves PWA, první verze: ověření, že mikrofon funguje na iPhonu i z plochy.
+// Grooves PWA: test mikrofonu (záložka Mikrofon) a stav offline. Sbírka a měření jsou v sbirka.js.
 
 const $ = (id) => document.getElementById(id);
 

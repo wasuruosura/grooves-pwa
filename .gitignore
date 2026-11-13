@@ -4,3 +4,6 @@ data/
 *.json.bak
 .DS_Store
 Thumbs.db
+
+# lokální testovací data (export sbírky), nikdy do veřejného repozitáře
+test-data/

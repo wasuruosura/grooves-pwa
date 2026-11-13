@@ -17,25 +17,96 @@
 <body>
   <main>
     <h1>Grooves</h1>
-    <p class="mut">Test mikrofonu</p>
 
-    <ul class="info">
-      <li>Spuštěno: <b id="rezim">…</b></li>
-      <li>Zabezpečené spojení: <b id="https">…</b></li>
-      <li>Mikrofon: <b id="stav">vypnutý</b></li>
-      <li>Offline: <b id="offline">nepřipraveno</b></li>
-    </ul>
+    <nav class="zalozky">
+      <button data-zalozka="sbirka" class="vybrana">Sbírka</button>
+      <button data-zalozka="mereni">Měření</button>
+      <button data-zalozka="mikrofon">Mikrofon</button>
+    </nav>
 
-    <button id="tlacitko">Zapnout mikrofon</button>
+    <!-- Sbírka: načtení exportu z Grooves, hledání, výběr tracku -->
+    <section id="z-sbirka">
+      <p id="sb-info" class="mut">Sbírka zatím není načtená.</p>
+      <!-- label kolem skrytého inputu: ťuknutí otevře výběr souboru (Soubory, Signal…) -->
+      <label class="tlacitko druhe">
+        Načíst sbírku z Grooves
+        <input id="sb-soubor" type="file" accept=".json,application/json,text/plain" hidden>
+      </label>
+      <p id="sb-chyba" class="chyba"></p>
+      <input id="sb-hledat" type="search" placeholder="Hledat: interpret, název, katalogové číslo" autocomplete="off" hidden>
+      <label id="sb-jen-bez-obal" class="prepinac" hidden><input id="sb-jen-bez" type="checkbox"> Jen desky s tracky bez BPM</label>
+      <ul id="sb-seznam" class="desky"></ul>
+      <p id="sb-vic" class="mut"></p>
+    </section>
 
-    <div class="meter" aria-label="Hlasitost">
-      <div id="uroven"></div>
-    </div>
-    <div id="uder" class="uder" aria-hidden="true"></div>
+    <!-- Měření: vybraný track, otáčky, pitch, BPM ručně nebo tapem -->
+    <section id="z-mereni" hidden>
+      <p id="me-zadny" class="mut">Vyber track ve Sbírce (ťukni na track, nebo na „Proměřit desku“).</p>
+      <div id="me-panel" hidden>
+        <p id="me-fronta" class="mut"></p>
+        <p id="me-otoc" class="upozorneni" hidden></p>
+        <div class="karta">
+          <div id="me-deska" class="mut"></div>
+          <div id="me-track" class="velky"></div>
+          <div id="me-ted" class="mut"></div>
+        </div>
 
-    <p id="chyba" class="chyba"></p>
-    <p class="mut">Pusť hudbu z reproduktoru. Ukazatel má kmitat a kolečko blikat do rytmu.</p>
+        <div class="radek">
+          <label>Otáčky
+            <select id="me-rpm">
+              <option value="33">33</option>
+              <option value="45">45</option>
+              <option value="78">78</option>
+            </select>
+          </label>
+          <label>Pitch %
+            <input id="me-pitch" type="text" inputmode="decimal" value="0">
+          </label>
+          <label>BPM
+            <input id="me-bpm" type="text" inputmode="decimal" placeholder="—">
+          </label>
+        </div>
+        <p class="mut mensi">Pitch a BPM jak jsou nastavené a slyšet na gramofonu. Uloží se BPM přepočtené na 0 %.</p>
+
+        <button id="me-tap" class="tap">Tap</button>
+        <p id="me-tap-info" class="mut mensi">Ťukej do rytmu. Víc ťuků = přesnější. Pauza 2 s začne znovu.</p>
+
+        <p>BPM při 0 %: <b id="me-nula">—</b></p>
+        <p id="me-chyba" class="chyba"></p>
+        <button id="me-ulozit">Uložit</button>
+        <button id="me-preskocit" class="druhe" hidden>Přeskočit track</button>
+      </div>
+
+      <div class="export">
+        <p>Neodeslaná měření: <b id="ex-pocet">0</b> <span class="mut" id="ex-celkem"></span></p>
+        <button id="ex-poslat" class="druhe">Poslat do Grooves</button>
+        <label class="prepinac"><input id="ex-vse" type="checkbox"> Poslat všechna měření znovu</label>
+        <p id="ex-info" class="mut mensi"></p>
+      </div>
+    </section>
+
+    <!-- Mikrofon: test, že zvuk teče (detekce BPM přijde později) -->
+    <section id="z-mikrofon" hidden>
+      <ul class="info">
+        <li>Spuštěno: <b id="rezim">…</b></li>
+        <li>Zabezpečené spojení: <b id="https">…</b></li>
+        <li>Mikrofon: <b id="stav">vypnutý</b></li>
+        <li>Offline: <b id="offline">nepřipraveno</b></li>
+      </ul>
+
+      <button id="tlacitko">Zapnout mikrofon</button>
+
+      <div class="meter" aria-label="Hlasitost">
+        <div id="uroven"></div>
+      </div>
+      <div id="uder" class="uder" aria-hidden="true"></div>
+
+      <p id="chyba" class="chyba"></p>
+      <p class="mut">Pusť hudbu z reproduktoru. Ukazatel má kmitat a kolečko blikat do rytmu.</p>
+    </section>
   </main>
+  <script src="db.js"></script>
+  <script src="sbirka.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -22,7 +22,7 @@ main { max-width: 480px; margin: 0 auto; padding-top: 24px; }
 h1 { margin: 0; font-size: 28px; font-weight: 600; }
 .mut { color: var(--mut); }
 
-.info { list-style: none; padding: 0; margin: 24px 0; }
+.info { list-style: none; padding: 0; margin: 16px 0 24px; }
 .info li { padding: 8px 0; border-bottom: 1px solid var(--line); }
 
 button {
@@ -56,3 +56,58 @@ button {
 .uder.zap { background: var(--accent); transition: none; }
 
 .chyba { color: var(--chyba); min-height: 1.5em; }
+
+/* ---------- Záložky ---------- */
+.zalozky { display: flex; gap: 6px; margin: 16px 0; }
+.zalozky button {
+  flex: 1; padding: 10px 4px; font-weight: 500;
+  background: var(--line); color: var(--text);
+}
+.zalozky button.vybrana { background: var(--accent); color: var(--bg); font-weight: 600; }
+
+button, .tlacitko { touch-action: manipulation; } /* bez zoomu dvojitým ťuknutím */
+button:disabled { opacity: 0.4; }
+.tlacitko {
+  display: block; text-align: center; padding: 16px; font-weight: 600;
+  border-radius: 12px; background: var(--accent); color: var(--bg);
+}
+button.druhe, .tlacitko.druhe { background: var(--line); color: var(--text); }
+.mensi { font-size: 14px; }
+.upozorneni { background: var(--accent); color: var(--bg); padding: 10px 12px; border-radius: 10px; font-weight: 600; }
+.prepinac { display: block; margin: 8px 0; color: var(--mut); }
+
+input[type=search], input[type=text], select {
+  width: 100%; padding: 12px; font: inherit; font-size: 17px; /* pod 16px iOS při psaní zoomuje */
+  color: var(--text); background: #1c1c1c; border: 1px solid var(--line); border-radius: 10px;
+}
+
+/* ---------- Sbírka ---------- */
+.desky { list-style: none; padding: 0; margin: 8px 0; }
+.deska { border-bottom: 1px solid var(--line); }
+.deska button.hlava {
+  background: none; color: var(--text); text-align: left; font-weight: 400;
+  padding: 12px 0; border-radius: 0;
+}
+.deska .nazev { font-weight: 600; }
+.deska button.promerit { margin: 4px 0 8px; padding: 12px; }
+.tracky { list-style: none; padding: 0; margin: 0 0 12px; }
+.tracky button.track {
+  display: flex; gap: 10px; align-items: baseline; text-align: left;
+  background: #1c1c1c; color: var(--text); font-weight: 400;
+  padding: 10px 12px; margin: 4px 0; border-radius: 8px;
+}
+.track .poz { color: var(--accent); font-weight: 600; min-width: 2.2em; }
+.track .tnazev { flex: 1; }
+.track .tbpm { font-variant-numeric: tabular-nums; }
+
+/* ---------- Měření ---------- */
+.karta { background: #1c1c1c; border-radius: 12px; padding: 12px; margin: 8px 0 16px; }
+.velky { font-size: 20px; font-weight: 600; }
+.radek { display: flex; gap: 8px; }
+.radek label { flex: 1; color: var(--mut); font-size: 14px; }
+.radek input, .radek select { margin-top: 4px; }
+button.tap { margin: 16px 0 4px; padding: 40px 16px; font-size: 24px; user-select: none; -webkit-user-select: none; }
+button.tap.zap { background: var(--text); }
+#me-ulozit { margin-bottom: 8px; }
+#me-nula { font-size: 22px; }
+.export { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); }
